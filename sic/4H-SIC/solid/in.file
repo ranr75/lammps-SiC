@@ -1,0 +1,154 @@
+#4H SiC
+echo both
+units            metal      
+dimension        3
+boundary         p p s   
+atom_style       atomic
+neighbor         1.0 bin   
+
+neigh_modify     delay 5 check yes
+
+# lattice         custom 3.08129 a1 0.5 -0.86602540 0.0 a2 0.5 0.86602540 0.0 a3 0.0 0.0 1.204 &
+#                        basis 0.0 0.0 0.0 basis 0.33333333 0.66666667 0.64552457 basis 0.66666667 0.33333333 0.35447543 &
+#                        basis 0.33333333 0.66666667 0.14489412 basis 0.66666667 0.33333333 0.85510588
+# region          box block 0 3.0 0 3.0 0 3.0 units lattice
+# create_box      2 box
+# create_atoms    1 box basis 1 2 basis 2 2 basis 3 2 basis 4 1 basis 5 1
+
+
+#3c-sic
+# lattice custom 4.35 origin 0.0 0.0 0.0 orient x 1 0 0 orient y 0 1 0 orient z 0 0 1  &
+# basis 0.0 0.0 0.0  &
+# basis 0.5 0.0 0.5  &
+# basis 0.0 0.5 0.5  &
+# basis 0.5 0.5 0.0  &
+# basis 0.25 0.25 0.25  &
+# basis 0.75 0.25 0.75  &
+# basis 0.25 0.75 0.75  &
+# basis 0.75 0.75 0.25  &
+# a1 1.0 0.0 0.0  &
+# a2 0.0 1.0 0.0  &
+# a3 0.0 0.0 1.0
+# region box block 0 4 0 4 0 4  units lattice
+# create_box 2 box
+# create_atoms 1 box &
+# basis 1 1 &
+# basis 2 1 &
+# basis 3 1 &
+# basis 4 1 &
+# basis 5 2 &
+# basis 6 2 &
+# basis 7 2 &
+# basis 8 2
+# mass 1 28.08
+# mass 2 12.01
+
+variable a equal 3.073000
+variable b equal $((v_a*sqrt(3)))
+variable c equal 10.053000
+
+lattice custom  1.0     &
+        a1      $a      0.0     0.0     &
+        a2      0.0     $b      0.0     &
+        a3      0.0     0.0     $c      &
+        basis   0.0    0.0    $((1.889964/v_c)) &
+        basis   $((1.536500/v_a))    $((2.661296/v_b))    $((1.889964/v_c))     &
+        basis   0.0    0.0    $((6.916464/v_c)) &
+        basis   $((1.536500/v_a))    $((2.661296/v_b))    $((6.916464/v_c))     &
+        basis   0.0    $((1.774197/v_b))    $((4.403214/v_c))   &
+        basis   $((1.536500/v_a))    $((0.887099/v_b))    $((9.429714/v_c))     &
+        basis   $((1.536500/v_a))    $((4.43549/v_b))     $((4.403214/v_c))     &
+        basis   0.0     $((3.5484/v_b))  $((9.429714/v_c))      &
+        basis    0.0    0.0    0.0      &
+        basis    $((1.536500/v_a))    $((2.661296/v_b))    0.0  &
+        basis    0.0    0.0    $((5.026500/v_c))        &
+        basis    $((1.536500/v_a))    $((2.661296/v_b))    $((5.026500/v_c))    &
+        basis    0.0    $((1.774197/v_b))    $((2.513250/v_c))  &
+        basis    $((1.536500/v_a))    $((0.887099/v_b))    $((7.539750/v_c))    &
+        basis    $((1.536500/v_a))    $((4.435493/v_b))    $((2.513250/v_c))    &
+        basis    0    $((3.548395/v_b))    $((7.539750/v_c))
+
+region        box block 0 12 0 16 0 22 units lattice
+region        addHeat block 0 12 0 16 14 22 units lattice
+region        fixTemp block 0 26 0 30 0 3 units lattice
+region        fixPosition block 0 26 0 30 0 1 units lattice
+create_box      2 box
+create_atoms    1 box           &
+        basis   1       2       &
+        basis   2       2       &
+        basis   3       2       &
+        basis   4       2       &
+        basis   5       2       &
+        basis   6       2       &
+        basis   7       2       &
+        basis   8       2
+#####
+  variable zLoNew equal -0.01*lz       
+  variable zHiNew equal 1.6*lz
+  variable xHiNew equal 1.1*lx
+  variable xLoNew equal 0.1*lx
+  variable yHiNew equal 1.1*ly
+  variable yLoNew equal -0.1*ly  
+#   change_box all z final ${zLoNew} ${zHiNew} units box
+#   # change_box all y final ${yLoNew} ${yHiNew} units box
+#   #   change_box all x final ${xLoNew} ${xHiNew} units box
+group h region  addHeat 
+group fixTempG region fixTemp
+group fixPositionG region fixPosition
+####
+mass             1 28.085  #type 1 = Si
+mass             2 12.011  #type 2 = C
+group SiC type 1 2 
+
+
+velocity         all create 300.0 4314354 dist gaussian mom yes
+fix              1 all nvt temp 300.0 300.0 0.005
+
+# /// FORCE FIELD START ///
+pair_style	 tersoff
+pair_coeff	 * * SiCC.txt Si C
+
+# /// FORCE FIELD END ///
+             
+neighbor         0.3 bin
+neigh_modify     every 5 delay 0 check yes
+
+thermo           1000
+timestep         0.001
+thermo_style     custom step time pe ke press temp 
+
+compute          3 all pe/atom
+compute          4 all ke/atom
+#compute          5 all coord/atom 1.0
+compute 33 SiC chunk/atom bin/1d z 0.0 10.0  units box    
+# dump             1 all atom 1 dump.melt #id xs ys zs c_3 c_4
+variable         tstep equal "time"
+variable         TT equal "temp"
+variable         Pe equal "pe/atoms"
+variable         Ke equal "ke/atoms"
+variable         Co equal "coord/atoms"
+variable         pervolume equal "vol/atoms"
+variable         tstep equal "time"
+run              20000
+compute s all stress/atom NULL
+compute v all voronoi/atom 
+unfix            1
+reset_timestep   0
+
+ fix              1 h heat 10 5300
+# fix              1 h temp/rescale 100 300 12000 200 1.0
+fix              2 all print 1000 "${tstep} ${TT} ${Pe} ${Ke} ${pervolume}" file data.dat screen no
+fix              3 all nve
+fix              4 fixTempG temp/rescale 100 300 300 10 1.0
+# fix  heatblock1  fixTempG  temp/berendsen 300 300 1    
+variable v equal 52340
+fix 55 SiC ave/chunk  100 50 5000 33 density/number vx temp c_s[3] file Density_vx_T.dat4
+velocity fixPositionG set 0 0 0 units box
+fix              5 fixPositionG setforce 0 0 0 
+dump 2 all atom 1000 temp_160ev_nospace.lammpstrj
+run              10000
+write_restart solid.restart  
+unfix 1
+fix 1 all temp/berendsen  300 300 0.1
+run 300000
+write_restart run40000.restart

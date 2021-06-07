@@ -1,0 +1,179 @@
+LAMMPS (3 Mar 2020)
+
+#---Zincblende SiC (3C) nanowire---
+units metal
+dimension 3
+boundary p p p
+atom_style atomic
+#---Lattice constants
+variable latconst_a equal 4.3596
+variable latconst_c equal sqrt(3)*latconst_a
+variable c_3C equal sqrt(3)
+#---Change radius of nanowire---
+variable rad_p equal 4.0
+variable rad_n equal -1*${rad_p}
+variable rad_n equal -1*4
+variable height equal 6*${c_3C}
+variable height equal 6*1.73205080756888
+#---Geometric constants dependent on radius---
+variable SiC_yp equal sqrt(3)/2*${rad_p}
+variable SiC_yp equal sqrt(3)/2*4
+variable SiC_yn equal sqrt(3)/2*${rad_n}
+variable SiC_yn equal sqrt(3)/2*-4
+variable SiC_xp equal 0.5*${rad_p}
+variable SiC_xp equal 0.5*4
+variable SiC_xn equal 0.5*${rad_n}
+variable SiC_xn equal 0.5*-4
+#---Create simulation box---
+lattice fcc ${latconst_a}
+lattice fcc 4.3596
+Lattice spacing in x,y,z = 4.3596 4.3596 4.3596
+region simbox block -5 5 -5 5 -0.01 ${height}
+region simbox block -5 5 -5 5 -0.01 10.3923048454133
+create_box 2 simbox
+Created orthogonal box = (-21.798 -21.798 -0.043596) to (21.798 21.798 45.3063)
+  2 by 2 by 2 MPI processor grid
+#---Defining nanowire ---
+region nprism1 prism 0 ${rad_p} -0.01 ${SiC_yp} -0.01 ${height} ${SiC_xn} 0 0
+region nprism1 prism 0 4 -0.01 ${SiC_yp} -0.01 ${height} ${SiC_xn} 0 0
+region nprism1 prism 0 4 -0.01 3.46410161513775 -0.01 ${height} ${SiC_xn} 0 0
+region nprism1 prism 0 4 -0.01 3.46410161513775 -0.01 10.3923048454133 ${SiC_xn} 0 0
+region nprism1 prism 0 4 -0.01 3.46410161513775 -0.01 10.3923048454133 -2 0 0
+region nprism2 prism ${rad_n} 0 -0.01 ${SiC_yp} -0.01 ${height} ${SiC_xp} 0 0
+region nprism2 prism -4 0 -0.01 ${SiC_yp} -0.01 ${height} ${SiC_xp} 0 0
+region nprism2 prism -4 0 -0.01 3.46410161513775 -0.01 ${height} ${SiC_xp} 0 0
+region nprism2 prism -4 0 -0.01 3.46410161513775 -0.01 10.3923048454133 ${SiC_xp} 0 0
+region nprism2 prism -4 0 -0.01 3.46410161513775 -0.01 10.3923048454133 2 0 0
+region nprism3 prism ${SiC_xn} ${SiC_xp} ${SiC_yn} -0.01 -0.01 ${height} ${SiC_xn} 0 0
+region nprism3 prism -2 ${SiC_xp} ${SiC_yn} -0.01 -0.01 ${height} ${SiC_xn} 0 0
+region nprism3 prism -2 2 ${SiC_yn} -0.01 -0.01 ${height} ${SiC_xn} 0 0
+region nprism3 prism -2 2 -3.46410161513775 -0.01 -0.01 ${height} ${SiC_xn} 0 0
+region nprism3 prism -2 2 -3.46410161513775 -0.01 -0.01 10.3923048454133 ${SiC_xn} 0 0
+region nprism3 prism -2 2 -3.46410161513775 -0.01 -0.01 10.3923048454133 -2 0 0
+region nprism4 prism ${SiC_xn} ${SiC_xp} ${SiC_yn} -0.01 -0.01 ${height} ${SiC_xp} 0 0
+region nprism4 prism -2 ${SiC_xp} ${SiC_yn} -0.01 -0.01 ${height} ${SiC_xp} 0 0
+region nprism4 prism -2 2 ${SiC_yn} -0.01 -0.01 ${height} ${SiC_xp} 0 0
+region nprism4 prism -2 2 -3.46410161513775 -0.01 -0.01 ${height} ${SiC_xp} 0 0
+region nprism4 prism -2 2 -3.46410161513775 -0.01 -0.01 10.3923048454133 ${SiC_xp} 0 0
+region nprism4 prism -2 2 -3.46410161513775 -0.01 -0.01 10.3923048454133 2 0 0
+
+
+
+region  nanowire union 4 nprism1 nprism2 nprism3 nprism4
+#---Creating the zb lattice (normalized z[111]-direction)
+lattice  custom ${latconst_a} orient x 1 1 -2 orient y -1 1 0 orient z 1 1 1 a1 1.0 0.0 0.0 a2 0.0 1.0 0.0 a3 0.0 0.0 1.0 basis 0.0 0.0 0.0  basis 0.0 0.5 0.5 basis 0.5 0.0 0.5  basis 0.5 0.5 0.0 basis 0.25 0.25 0.25  basis 0.25 0.75 0.75 basis 0.75 0.25 0.75  basis 0.75 0.75 0.25
+lattice  custom 4.3596 orient x 1 1 -2 orient y -1 1 0 orient z 1 1 1 a1 1.0 0.0 0.0 a2 0.0 1.0 0.0 a3 0.0 0.0 1.0 basis 0.0 0.0 0.0  basis 0.0 0.5 0.5 basis 0.5 0.0 0.5  basis 0.5 0.5 0.0 basis 0.25 0.25 0.25  basis 0.25 0.75 0.75 basis 0.75 0.25 0.75  basis 0.75 0.75 0.25
+Lattice spacing in x,y,z = 7.1192 6.16541 7.55105
+#---Adding atoms---
+create_atoms 2 region nanowire basis 1 1 basis 2 1 basis 3 1 basis 4 1 basis 5 2 basis 6 2 basis 7 2 basis 7 2
+Created 3252 atoms
+  create_atoms CPU = 0.00116503 secs
+group nanowire region nanowire
+3252 atoms in group nanowire
+#---Defining Atomic potential---
+mass  1  28.085
+mass  2  12.011
+group Si type 1
+1626 atoms in group Si
+group C type 2
+1626 atoms in group C
+pair_style  meam/c
+pair_coeff  * * library.meam Si C SiC.meam Si C
+Reading potential file library.meam with DATE: 2012-06-29
+Reading potential file SiC.meam with DATE: 2007-06-11
+#---Initial velocities
+replicate 1 1 3
+  orthogonal box = (-21.798 -21.798 -0.043596) to (21.798 21.798 136.006)
+  1 by 2 by 4 MPI processor grid
+  9756 atoms
+  replicate CPU = 0.00216509 secs
+change_box all z final -60 200 units box
+  orthogonal box = (-21.798 -21.798 -60) to (21.798 21.798 200)
+change_box all x final -60 60 units box
+  orthogonal box = (-60 -21.798 -60) to (60 21.798 200)
+change_box all y final -60 60 units box
+  orthogonal box = (-60 -60 -60) to (60 60 200)
+write_data sic.data
+Neighbor list info ...
+  update every 1 steps, delay 10 steps, check yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 6
+  ghost atom cutoff = 6
+  binsize = 3, bins = 40 40 87
+  2 neighbor lists, perpetual/occasional/extra = 2 0 0
+  (1) pair meam/c, perpetual
+      attributes: full, newton on
+      pair build: full/bin/atomonly
+      stencil: full/bin/3d
+      bin: standard
+  (2) pair meam/c, perpetual, half/full from (1)
+      attributes: half, newton on
+      pair build: halffull/newton
+      stencil: none
+      bin: none
+velocity  all create 0.01 511124 rot yes mom yes
+#---Compute stress---
+compute stress all stress/atom NULL
+compute stress3 all reduce sum c_stress[3]
+variable  stress equal c_stress3
+variable  volu equal vol
+variable  Lx equal lx
+variable  Ly equal ly
+variable  Lz equal lz
+compute epatom all pe/atom
+variable epot equal pe
+#---Print to screen---
+thermo  100
+thermo_style  custom step vol temp pe lx ly lz pzz c_stress3
+
+
+
+
+
+
+#---Bar stat---
+timestep  0.0001
+#fix  RELAXBOX all box/relax iso 0.0
+min_style sd
+minimize 1e-5 1e-5 50000 100000
+WARNING: Using 'neigh_modify every 1 delay 0 check yes' setting during minimization (../min.cpp:190)
+Per MPI rank memory allocation (min/avg/max) = 10.03 | 11.61 | 13.27 Mbytes
+Step Volume Temp PotEng Lx Ly Lz Pzz c_stress3 
+       0      3744000         0.01   -52253.462          120          120          260    22435.329 -8.3997872e+10 
+      95      3744000         0.01   -58454.121          120          120          260    1462.3121 -5.4748964e+09 
+Loop time of 2.16346 on 8 procs for 95 steps with 9756 atoms
+
+99.3% CPU use with 8 MPI tasks x no OpenMP threads
+
+Minimization stats:
+  Stopping criterion = energy tolerance
+  Energy initial, next-to-last, final = 
+        -52253.4616921     -58453.9703492     -58454.1212178
+  Force two-norm initial, final = 3024.42 16.4694
+  Force max component initial, final = 238.752 4.4003
+  Final line search alpha, max atom move = 0.0584654 0.257265
+  Iterations, force evaluations = 95 175
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 1.7966     | 1.9385     | 2.0741     |   9.4 | 89.60
+Neigh   | 0.00020668 | 0.0055009  | 0.011422   |   6.8 |  0.25
+Comm    | 0.061168   | 0.20113    | 0.34788    |  30.1 |  9.30
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 0.01831    |            |       |  0.85
+
+Nlocal:    1219.5 ave 2336 max 44 min
+Histogram: 4 0 0 0 0 0 0 0 0 4
+Nghost:    938 ave 1666 max 283 min
+Histogram: 4 0 0 0 0 0 0 0 2 2
+Neighs:    43884.2 ave 85740 max 246 min
+Histogram: 4 0 0 0 0 0 0 0 0 4
+FullNghs:  87768.5 ave 171294 max 1655 min
+Histogram: 4 0 0 0 0 0 0 0 0 4
+
+Total # of neighbors = 702148
+Ave neighs/atom = 71.9709
+Neighbor list builds = 2
+Dangerous builds = 0
